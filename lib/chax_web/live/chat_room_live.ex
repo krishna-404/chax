@@ -43,7 +43,7 @@ defmodule ChaxWeb.ChatRoomLive do
   attr :room, Room, required: true
   defp room_link(assigns) do
     ~H"""
-    <a
+    <.link
       class={[
         "flex items-center h-8 text-sm pl-8 pr-3",
         (@active && "bg-slate-300") || "hover:bg-slate-300"
@@ -54,7 +54,7 @@ defmodule ChaxWeb.ChatRoomLive do
       <span class={["ml-2 leading-none", @active && "font-bold"]}>
         <%= @room.name %>
       </span>
-    </a>
+    </.link>
     """
   end
 
