@@ -21,6 +21,12 @@ defmodule ChaxWeb.ChatRoomLive do
 
   def mount(_params, _session, socket) do
     room = Room |> Repo.all() |> List.first()
-    {:ok, assign(socket, :room, room)}
+
+    socket =
+      socket
+      |> assign(:room, room)
+      |> assign(:director, "Tommy Wiseau")
+
+    {:ok, socket}
   end
 end
