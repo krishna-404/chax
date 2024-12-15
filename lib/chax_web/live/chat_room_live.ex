@@ -1,7 +1,7 @@
 defmodule ChaxWeb.ChatRoomLive do
   use ChaxWeb, :live_view
 
-  alias Chax.Repo
+  alias Chax.Chat
   alias Chax.Chat.Room
 
   def render(assigns) do
@@ -60,7 +60,7 @@ defmodule ChaxWeb.ChatRoomLive do
 
   # Mount is not called when patch is used in <.link>
   def mount(_params, _session, socket) do
-    rooms = Room |> Repo.all()
+    rooms = Chat.list_rooms()
 
     socket =
       socket
@@ -72,7 +72,7 @@ defmodule ChaxWeb.ChatRoomLive do
   def handle_params(params, _session, socket) do
     room = case Map.fetch(params, "id") do
       {:ok, id} ->
-        Repo.get!(Room, id)
+        Chat.get_room(id)
       :error ->
         socket.assigns.rooms |> List.first()
     end
