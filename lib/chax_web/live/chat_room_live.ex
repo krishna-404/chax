@@ -39,6 +39,6 @@ defmodule ChaxWeb.ChatRoomLive do
   end
 
   def handle_event("toggle-topic", _params, socket) do
-    {:noreply, socket |> assign(:hide_topic, !socket.assigns.hide_topic)}
+    {:noreply, socket |> update(:hide_topic, &(!&1))}
   end
 end
