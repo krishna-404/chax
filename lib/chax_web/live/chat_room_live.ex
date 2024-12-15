@@ -1,6 +1,9 @@
 defmodule ChaxWeb.ChatRoomLive do
   use ChaxWeb, :live_view
 
+  alias Chax.Repo
+  alias Chax.Chat.Room
+
   def render(assigns) do
     ~H"""
       <div class="flex flex-col flex-grow shadow-lg">
@@ -17,6 +20,7 @@ defmodule ChaxWeb.ChatRoomLive do
   end
 
   def mount(_params, _session, socket) do
-
+    room = Room |> Repo.all() |> List.first()
+    {:ok, assign(socket, :room, room)}
   end
 end
