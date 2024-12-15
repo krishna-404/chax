@@ -12,7 +12,9 @@ defmodule ChaxWeb.ChatRoomLive do
           <h1 class="text-sm font-bold leading-none">
             #{@room.name}
           </h1>
-          <div class="text-xs leading-none h-3.5">{@room.topic}</div>
+          <div class="text-xs leading-none h-3.5" phx-click="toggle-topic">
+            {@hide_topic && "Placeholder topic" || @room.topic}
+          </div>
         </div>
       </div>
     </div>
@@ -31,8 +33,12 @@ defmodule ChaxWeb.ChatRoomLive do
     socket =
       socket
       |> assign(:room, room)
-      |> assign(:director, "Tommy Wiseau")
+      |> assign(:hide_topic, true)
 
     {:ok, socket}
+  end
+
+  def handle_event("toggle-topic", _params, socket) do
+    {:noreply, socket |> assign(:hide_topic, !socket.assigns.hide_topic)}
   end
 end
