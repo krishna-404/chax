@@ -20,6 +20,12 @@ defmodule ChaxWeb.ChatRoomLive do
   end
 
   def mount(_params, _session, socket) do
+    IO.puts("mounting")
+    if connected?(socket) do
+      IO.puts("mounting (connected)")
+    else
+      IO.puts("mounting (not connected)")
+    end
     room = Room |> Repo.all() |> List.first()
 
     socket =
