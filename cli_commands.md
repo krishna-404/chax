@@ -36,3 +36,8 @@ When prompted for live-view based authentication, select `yes`.
 mix deps.get
 mix ecto.migrate
 ```
+
+## Generate schema for chat messages
+```bash
+mix phx.gen.schema Chat.Message messages user_id:references:users room_id:references:rooms body:text
+```
