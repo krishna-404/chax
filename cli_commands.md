@@ -41,3 +41,8 @@ mix ecto.migrate
 ```bash
 mix phx.gen.schema Chat.Message messages user_id:references:users room_id:references:rooms body:text
 ```
+
+## Migrate the database
+```bash
+mix ecto.migrate
+```

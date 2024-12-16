@@ -3,9 +3,9 @@ defmodule Chax.Repo.Migrations.CreateMessages do
 
   def change do
     create table(:messages) do
-      add :body, :text
-      add :user_id, references(:users, on_delete: :nothing)
-      add :room_id, references(:rooms, on_delete: :nothing)
+      add :body, :text, null: false
+      add :user_id, references(:users, on_delete: :delete_all), null: false
+      add :room_id, references(:rooms, on_delete: :delete_all), null: false
 
       timestamps(type: :utc_datetime)
     end
