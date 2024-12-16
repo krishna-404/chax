@@ -194,14 +194,18 @@ defmodule ChaxWeb.ChatRoomLive do
 
   @spec handle_params(map(), any(), map()) :: {:noreply, map()}
   def handle_params(params, _session, socket) do
+    if socket.assigns[:room], do: Chat.unsubscribe_from_room(socket.assigns.room)
+
     room = case Map.fetch(params, "id") do
       {:ok, id} ->
         Chat.get_room(id)
       :error ->
         Chat.get_first_room!()
     end
-
+    IO.inspect(room, label: "room")
     messages = Chat.list_messages_in_room(room)
+
+    Chat.subscribe_to_room(room)
 
     socket = socket
       |> assign(:room, room)
@@ -231,8 +235,8 @@ defmodule ChaxWeb.ChatRoomLive do
 
     socket =
       case Chat.create_message(room, message_params, current_user) do
-        {:ok, message} ->
-          socket |> stream_insert(:messages, message) |> assign_message_form(Chat.change_message(%Message{}))
+        {:ok, _message} ->
+          socket |> assign_message_form(Chat.change_message(%Message{}))
         {:error, changeset} ->
           socket |> assign_message_form(changeset)
       end
@@ -241,7 +245,15 @@ defmodule ChaxWeb.ChatRoomLive do
   end
 
   def handle_event("delete-message", %{"id" => id}, socket) do
-    {:ok, message} = Chat.delete_message_by_id(id, socket.assigns.current_user)
+    Chat.delete_message_by_id(id, socket.assigns.current_user)
+    {:noreply, socket}
+  end
+
+  def handle_info({:new_message, message}, socket) do
+    {:noreply, stream_insert(socket, :messages, message)}
+  end
+
+  def handle_info({:message_deleted, message}, socket) do
     {:noreply, stream_delete(socket, :messages, message)}
   end
 end

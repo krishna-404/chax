@@ -2,16 +2,23 @@ defmodule Chax.Chat do
   alias Chax.Accounts.User
   alias Chax.Chat.{Message, Room}
   alias Chax.Repo
+
   import Ecto.Query
+
+  @pubsub Chax.PubSub
 
   def change_message(message, attrs \\ %{}) do
     Message.changeset(message, attrs)
   end
 
   def create_message(room, attrs, user) do
-    %Message{room: room, user: user}
-    |> Message.changeset(attrs)
-    |> Repo.insert()
+    with {:ok, message} <-
+      %Message{room: room, user: user}
+      |> Message.changeset(attrs)
+      |> Repo.insert() do
+        Phoenix.PubSub.broadcast!(@pubsub, topic(room.id), {:new_message, message})
+        {:ok, message}
+      end
   end
 
   def change_room(room, attrs \\ %{}) do
@@ -31,6 +38,10 @@ defmodule Chax.Chat do
       raise "Not authorized"
     end
     Repo.delete(message)
+
+    Phoenix.PubSub.broadcast!(@pubsub, topic(message.room_id), {:message_deleted, message})
+
+    {:ok, message}
   end
 
   def get_first_room! do
@@ -52,6 +63,17 @@ defmodule Chax.Chat do
   def list_rooms do
     Repo.all(Room |> order_by([asc: :name]))
   end
+
+  def subscribe_to_room(room) do
+    IO.inspect(room, label: "room")
+    Phoenix.PubSub.subscribe(@pubsub, topic(room.id))
+  end
+
+  def unsubscribe_from_room(room) do
+    Phoenix.PubSub.unsubscribe(@pubsub, topic(room.id))
+  end
+
+  defp topic(room_id), do: "chat_room:#{room_id}"
 
   def update_room(%Room{} = room, attrs) do
     room
