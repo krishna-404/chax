@@ -26,3 +26,13 @@ mix ecto.dump
 mix phx.gen.migration create_unique_index_on_room_name
 mix ecto.migrate
 ```
+## Generate a phoenix auth for auth based on email and password
+```bash
+mix phx.gen.auth Accounts User users
+```
+When prompted for live-view based authentication, select `yes`.
+
+```bash
+mix deps.get
+mix ecto.migrate
+```
