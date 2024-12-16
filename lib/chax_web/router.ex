@@ -19,6 +19,7 @@ defmodule ChaxWeb.Router do
 
     live "/", ChatRoomLive
     live "/rooms/:id", ChatRoomLive
+    live "/rooms/:id/edit", ChatRoomEditLive
   end
 
   # Other scopes may use custom stacks.

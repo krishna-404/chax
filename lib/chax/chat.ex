@@ -3,6 +3,10 @@ defmodule Chax.Chat do
   alias Chax.Repo
   import Ecto.Query
 
+  def change_room(room, attrs \\ %{}) do
+    Room.changeset(room, attrs)
+  end
+
   def create_room(attrs) do
     %Room{}
     |> Room.changeset(attrs)
