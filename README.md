@@ -1,24 +1,3 @@
-Creating a new Phoenix Chat project
-
-# CLI Commands:
-## Initialize the project & create the database
-```bash
-mix phx.new chax
-cd chax
-mix ecto.create
-```
-
-## Generate schema for the database & migration
-```bash
-mix phx.gen.schema Chat.Room rooms name:string topic:text
-mix ecto.migrate
-```
-Optional:
-### Generate SQL dump of current database schema
-```bash
-mix ecto.dump
-```
-
 # Chax
 
 To start your Phoenix server:

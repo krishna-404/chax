@@ -17,5 +17,7 @@ defmodule Chax.Chat.Room do
     |> validate_length(:name, max: 80)
     |> validate_format(:name, ~r/\A[a-z0-9-]+\z/, message: "must contain only lowercase letters, numbers, and hyphens")
     |> validate_length(:topic, max: 200)
+    |> unsafe_validate_unique(:name, Chax.Repo)
+    |> unique_constraint(:name)
   end
 end
