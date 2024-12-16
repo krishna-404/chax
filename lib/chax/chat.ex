@@ -28,6 +28,6 @@ defmodule Chax.Chat do
   def update_room(%Room{} = room, attrs) do
     room
     |> Room.changeset(attrs)
-    |> Repo.update!()
+    |> Repo.update()
   end
 end
