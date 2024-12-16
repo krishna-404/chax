@@ -75,7 +75,7 @@ defmodule ChaxWeb.ChatRoomLive do
       {:ok, id} ->
         Chat.get_room(id)
       :error ->
-        socket.assigns.rooms |> List.first()
+        Chat.get_first_room!()
     end
 
     socket = socket
