@@ -69,6 +69,7 @@ defmodule ChaxWeb.ChatRoomLive do
     {:ok, socket}
   end
 
+  @spec handle_params(map(), any(), map()) :: {:noreply, map()}
   def handle_params(params, _session, socket) do
     room = case Map.fetch(params, "id") do
       {:ok, id} ->
@@ -77,7 +78,10 @@ defmodule ChaxWeb.ChatRoomLive do
         socket.assigns.rooms |> List.first()
     end
 
-    socket = socket |> assign(:room, room) |> assign(:hide_topic, false)
+    socket = socket
+      |> assign(:room, room)
+      |> assign(:hide_topic, false)
+      |> assign(:page_title, "#" <> room.name)
 
     {:noreply, socket}
   end
