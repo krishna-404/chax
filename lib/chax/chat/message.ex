@@ -1,11 +1,13 @@
 defmodule Chax.Chat.Message do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Chax.Accounts.User
+  alias Chax.Chat.Room
 
   schema "messages" do
     field :body, :string
-    field :user_id, :id
-    field :room_id, :id
+    belongs_to :user, User
+    belongs_to :room, Room
 
     timestamps(type: :utc_datetime)
   end
