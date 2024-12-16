@@ -83,8 +83,8 @@ defmodule ChaxWeb.ChatRoomLive do
           <% end %>
         </ul>
       </div>
-      <div class="flex flex-col flex-grow overflow-auto">
-       <.message :for={message <- @messages} message={message} />
+      <div id="room-messages" class="flex flex-col flex-grow overflow-auto" phx-update="stream">
+        <.message :for={{dom_id, message} <- @streams.messages} dom_id={dom_id} message={message} />
      </div>
      <div class="h-12 bg-white px-4 pb-4">
         <.form
@@ -112,10 +112,11 @@ defmodule ChaxWeb.ChatRoomLive do
     """
   end
 
+  attr :dom_id, :string, required: true
   attr :message, Message, required: true
   def message(assigns) do
     ~H"""
-      <div class="relative flex px-4 py-3">
+      <div id={@dom_id} class="relative flex px-4 py-3">
         <div class="h-10 w-10 rounded flex-shrink-0 bg-slate-300"></div>
         <div class="ml-2">
           <div class="-mt-1">
@@ -178,7 +179,7 @@ defmodule ChaxWeb.ChatRoomLive do
       |> assign(:room, room)
       |> assign(:hide_topic, false)
       |> assign(:page_title, "#" <> room.name)
-      |> assign(:messages, messages)
+      |> stream(:messages, messages, reset: true)
       |> assign_message_form(Chat.change_message(%Message{})) # To reset the message form on room change
 
     {:noreply, socket}
@@ -203,7 +204,7 @@ defmodule ChaxWeb.ChatRoomLive do
     socket =
       case Chat.create_message(room, message_params, current_user) do
         {:ok, message} ->
-          socket |> update(:messages, &(&1 ++ [message])) |> assign_message_form(Chat.change_message(%Message{}))
+          socket |> stream_insert(:messages, message) |> assign_message_form(Chat.change_message(%Message{}))
         {:error, changeset} ->
           socket |> assign_message_form(changeset)
       end
