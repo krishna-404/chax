@@ -1,4 +1,5 @@
 defmodule Chax.Chat do
+  alias Chax.Accounts.User
   alias Chax.Chat.{Message, Room}
   alias Chax.Repo
   import Ecto.Query
@@ -21,6 +22,15 @@ defmodule Chax.Chat do
     %Room{}
     |> Room.changeset(attrs)
     |> Repo.insert!()
+  end
+
+  def delete_message_by_id(id, %User{id: user_id}) do
+    #message = %Message{user_id: ^user_id} = Repo.get!(Message, id)
+    message = Repo.get!(Message, id)
+    if message.user_id != user_id do
+      raise "Not authorized"
+    end
+    Repo.delete(message)
   end
 
   def get_first_room! do

@@ -3,6 +3,7 @@ defmodule ChaxWeb.ChatRoomLive do
 
   alias Chax.Chat
   alias Chax.Chat.{Message, Room}
+  alias Chax.Accounts.User
 
   def render(assigns) do
     ~H"""
@@ -84,7 +85,13 @@ defmodule ChaxWeb.ChatRoomLive do
         </ul>
       </div>
       <div id="room-messages" class="flex flex-col flex-grow overflow-auto" phx-update="stream">
-        <.message :for={{dom_id, message} <- @streams.messages} dom_id={dom_id} message={message} timezone={@timezone}/>
+        <.message
+          :for={{dom_id, message} <- @streams.messages}
+          current_user={@current_user}
+          dom_id={dom_id}
+          message={message}
+          timezone={@timezone}
+        />
      </div>
      <div class="h-12 bg-white px-4 pb-4">
         <.form
@@ -112,12 +119,22 @@ defmodule ChaxWeb.ChatRoomLive do
     """
   end
 
+  attr :current_user, User, required: true
   attr :dom_id, :string, required: true
   attr :message, Message, required: true
   attr :timezone, :string, required: true
   def message(assigns) do
     ~H"""
-      <div id={@dom_id} class="relative flex px-4 py-3">
+      <div id={@dom_id} class="group relative flex px-4 py-3">
+        <button
+          :if={@current_user.id == @message.user_id}
+          class="absolute top-4 right-4 text-red-500 hover:text-red-800 cursor-pointer hidden group-hover:block"
+          data-confirm="Are you sure?"
+          phx-click="delete-message"
+          phx-value-id={@message.id}
+        >
+          <.icon name="hero-trash" class="h-4 w-4" />
+        </button>
         <div class="h-10 w-10 rounded flex-shrink-0 bg-slate-300"></div>
         <div class="ml-2">
           <div class="-mt-1">
@@ -221,5 +238,10 @@ defmodule ChaxWeb.ChatRoomLive do
       end
 
     {:noreply, socket}
+  end
+
+  def handle_event("delete-message", %{"id" => id}, socket) do
+    {:ok, message} = Chat.delete_message_by_id(id, socket.assigns.current_user)
+    {:noreply, stream_delete(socket, :messages, message)}
   end
 end
