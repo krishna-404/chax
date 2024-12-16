@@ -46,3 +46,8 @@ mix phx.gen.schema Chat.Message messages user_id:references:users room_id:refere
 ```bash
 mix ecto.migrate
 ```
+
+## Seed the database
+```bash
+mix run priv/repo/seeds.exs
+```
