@@ -84,7 +84,7 @@ defmodule ChaxWeb.ChatRoomLive do
         </ul>
       </div>
       <div id="room-messages" class="flex flex-col flex-grow overflow-auto" phx-update="stream">
-        <.message :for={{dom_id, message} <- @streams.messages} dom_id={dom_id} message={message} />
+        <.message :for={{dom_id, message} <- @streams.messages} dom_id={dom_id} message={message} timezone={@timezone}/>
      </div>
      <div class="h-12 bg-white px-4 pb-4">
         <.form
@@ -114,6 +114,7 @@ defmodule ChaxWeb.ChatRoomLive do
 
   attr :dom_id, :string, required: true
   attr :message, Message, required: true
+  attr :timezone, :string, required: true
   def message(assigns) do
     ~H"""
       <div id={@dom_id} class="relative flex px-4 py-3">
@@ -123,7 +124,10 @@ defmodule ChaxWeb.ChatRoomLive do
             <.link class="text-sm font-semibold hover:underline">
               <span>{username(@message.user)}</span>
             </.link>
-            <span class="ml-1 text-xs text-gray-500"><%= message_timestamp(@message) %></span>
+            <%!-- Timezone is not nil during the initial render when the socket is not connected yet --%>
+            <span :if={@timezone} class="ml-1 text-xs text-gray-500">
+              <%= message_timestamp(@message, @timezone) %>
+            </span>
             <p class="text-sm"><%= @message.body %></p>
           </div>
         </div>
@@ -135,8 +139,8 @@ defmodule ChaxWeb.ChatRoomLive do
     user.email |> String.split("@") |> List.first() |> String.capitalize()
   end
 
-  defp message_timestamp(message) do
-    message.inserted_at |> Timex.format!("%-l:%M %p", :strftime)
+  defp message_timestamp(message, timezone) do
+    message.inserted_at |> Timex.Timezone.convert(timezone) |> Timex.format!("%-l:%M %p", :strftime)
   end
 
   attr :active, :boolean, required: true
@@ -161,10 +165,12 @@ defmodule ChaxWeb.ChatRoomLive do
   # Mount is not called when patch is used in <.link>
   def mount(_params, _session, socket) do
     rooms = Chat.list_rooms()
+    timezone = get_connect_params(socket)["timezone"]
 
     socket =
       socket
       |> assign(:rooms, rooms)
+      |> assign(:timezone, timezone)
 
     {:ok, socket}
   end
