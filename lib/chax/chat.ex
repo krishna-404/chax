@@ -1,5 +1,5 @@
 defmodule Chax.Chat do
-  alias Chax.Chat.Room
+  alias Chax.Chat.{Message, Room}
   alias Chax.Repo
   import Ecto.Query
 
@@ -19,6 +19,13 @@ defmodule Chax.Chat do
 
   def get_room(id) do
     Repo.get!(Room, id)
+  end
+
+  def list_messages_in_room(%Room{id: room_id}) do
+    Message
+    |> where([m], m.room_id == ^room_id)
+    |> order_by([m], asc: :inserted_at, asc: :id)
+    |> Repo.all()
   end
 
   def list_rooms do
