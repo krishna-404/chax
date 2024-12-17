@@ -71,7 +71,7 @@ defmodule ChaxWeb.ChatRoomLive do
             </.link>
           </h1>
           <div class="text-xs leading-none h-3.5" phx-click="toggle-topic">
-            {(@hide_topic && "Show topic") || @room.topic}
+            {(@hide_topic? && "Show topic") || @room.topic}
           </div>
         </div>
         <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
@@ -130,7 +130,7 @@ defmodule ChaxWeb.ChatRoomLive do
           timezone={@timezone}
         />
      </div>
-     <div class="h-12 bg-white px-4 pb-4">
+     <div :if={@joined?} class="h-12 bg-white px-4 pb-4">
         <.form
           id="new-message-form"
           for={@new_message_form}
@@ -236,7 +236,7 @@ defmodule ChaxWeb.ChatRoomLive do
 
   # Mount is not called when patch is used in <.link>
   def mount(_params, _session, socket) do
-    rooms = Chat.list_rooms()
+    rooms = Chat.list_joined_rooms(socket.assigns.current_user)
     users = Accounts.list_users()
 
     timezone = get_connect_params(socket)["timezone"]
@@ -274,7 +274,8 @@ defmodule ChaxWeb.ChatRoomLive do
 
     socket = socket
       |> assign(:room, room)
-      |> assign(:hide_topic, false)
+      |> assign(:hide_topic?, false)
+      |> assign(:joined?, Chat.joined?(room, socket.assigns.current_user))
       |> assign(:page_title, "#" <> room.name)
       |> stream(:messages, messages, reset: true)
       |> assign_message_form(Chat.change_message(%Message{})) # To reset the message form on room change
@@ -288,7 +289,7 @@ defmodule ChaxWeb.ChatRoomLive do
   end
 
   def handle_event("toggle-topic", _params, socket) do
-    {:noreply, socket |> update(:hide_topic, &(!&1))}
+    {:noreply, socket |> update(:hide_topic?, &(!&1))}
   end
 
   def handle_event("validate-message", %{"message" => message_params}, socket) do
@@ -299,12 +300,17 @@ defmodule ChaxWeb.ChatRoomLive do
   def handle_event("submit-message", %{"message" => message_params}, socket) do
     %{current_user: current_user, room: room} = socket.assigns
 
+
     socket =
-      case Chat.create_message(room, message_params, current_user) do
-        {:ok, _message} ->
-          socket |> assign_message_form(Chat.change_message(%Message{}))
-        {:error, changeset} ->
-          socket |> assign_message_form(changeset)
+      if Chat.joined?(room, current_user) do
+        case Chat.create_message(room, message_params, current_user) do
+          {:ok, _message} ->
+            socket |> assign_message_form(Chat.change_message(%Message{}))
+          {:error, changeset} ->
+            socket |> assign_message_form(changeset)
+        end
+      else
+        socket
       end
 
     {:noreply, socket}
