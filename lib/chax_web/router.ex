@@ -61,6 +61,7 @@ defmodule ChaxWeb.Router do
     live_session :require_authenticated_user,
       on_mount: [{ChaxWeb.UserAuth, :ensure_authenticated}] do
       live "/", ChatRoomLive
+      live "/rooms", ChatRoomLive.Index
       live "/rooms/:id", ChatRoomLive
       live "/rooms/:id/edit", ChatRoomEditLive
       live "/users/settings", UserSettingsLive, :edit
