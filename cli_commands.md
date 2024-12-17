@@ -56,3 +56,9 @@ mix run priv/repo/seeds.exs
 ```bash
 mix phx.gen.presence
 ```
+
+## Generate a room membership schema
+```bash
+mix phx.gen.schema Chat.RoomMembership room_memberships user_id:references:users room_id:references:rooms
+mix ecto.migrate
+```

@@ -1,11 +1,15 @@
 defmodule Chax.Chat.Room do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Chax.Chat.Message
+
+  alias Chax.Chat.{Message, RoomMembership}
+  alias Chax.Accounts.User
 
   schema "rooms" do
     field :name, :string
     field :topic, :string
+
+    many_to_many :users, User, join_through: RoomMembership
 
     has_many :messages, Message
 

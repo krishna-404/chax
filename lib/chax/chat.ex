@@ -1,6 +1,6 @@
 defmodule Chax.Chat do
   alias Chax.Accounts.User
-  alias Chax.Chat.{Message, Room}
+  alias Chax.Chat.{Message, Room, RoomMembership}
   alias Chax.Repo
 
   import Ecto.Query
@@ -50,6 +50,10 @@ defmodule Chax.Chat do
 
   def get_room(id) do
     Repo.get!(Room, id)
+  end
+
+  def join_room!(room, user) do
+    Repo.insert!(%RoomMembership{room: room, user: user})
   end
 
   def list_messages_in_room(%Room{id: room_id}) do
