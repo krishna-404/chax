@@ -79,6 +79,17 @@ defmodule Chax.Chat do
     Repo.all(Room |> order_by([asc: :name]))
   end
 
+  def list_rooms_with_joined(%User{} = user) do
+    query =
+      from r in Room,
+        left_join: rm in RoomMembership,
+        on: rm.room_id == r.id and rm.user_id == ^user.id,
+        select: {r, not is_nil(rm.id)},
+        order_by: [asc: :name]
+
+    Repo.all(query)
+  end
+
   def subscribe_to_room(room) do
     IO.inspect(room, label: "room")
     Phoenix.PubSub.subscribe(@pubsub, topic(room.id))
