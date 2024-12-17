@@ -34,7 +34,7 @@ defmodule ChaxWeb.ChatRoomEditLive do
   end
 
   def mount(%{"id" => id}, _session, socket) do
-    room = Chat.get_room(id)
+    room = Chat.get_room!(id)
     socket =
     if Chat.joined?(room, socket.assigns.current_user) do
       changeset = Chat.change_room(room)

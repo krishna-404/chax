@@ -48,7 +48,7 @@ defmodule Chax.Chat do
     Repo.one!(Room |> order_by([asc: :name]) |> limit(1))
   end
 
-  def get_room(id) do
+  def get_room!(id) do
     Repo.get!(Room, id)
   end
 
@@ -93,6 +93,18 @@ defmodule Chax.Chat do
   def subscribe_to_room(room) do
     IO.inspect(room, label: "room")
     Phoenix.PubSub.subscribe(@pubsub, topic(room.id))
+  end
+
+  def toggle_room_membership(room, user) do
+    case Repo.get_by(RoomMembership, room_id: room.id, user_id: user.id) do
+      %RoomMembership{} = membership ->
+        Repo.delete(membership)
+      {room, false}
+
+      nil ->
+        join_room!(room, user)
+      {room, true}
+    end
   end
 
   def unsubscribe_from_room(room) do

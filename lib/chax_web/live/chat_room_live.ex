@@ -292,7 +292,7 @@ defmodule ChaxWeb.ChatRoomLive do
 
     room = case Map.fetch(params, "id") do
       {:ok, id} ->
-        Chat.get_room(id)
+        Chat.get_room!(id)
       :error ->
         Chat.get_first_room!()
     end
