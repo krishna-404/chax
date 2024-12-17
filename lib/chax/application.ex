@@ -14,6 +14,7 @@ defmodule Chax.Application do
       {Phoenix.PubSub, name: Chax.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Chax.Finch},
+      ChaxWeb.Presence,
       # Start a worker by calling: Chax.Worker.start_link(arg)
       # {Chax.Worker, arg},
       # Start to serve requests, typically the last entry

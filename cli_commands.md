@@ -51,3 +51,8 @@ mix ecto.migrate
 ```bash
 mix run priv/repo/seeds.exs
 ```
+
+## Generate a phoenix presence instance
+```bash
+mix phx.gen.presence
+```

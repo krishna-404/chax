@@ -5,6 +5,7 @@ defmodule ChaxWeb.ChatRoomLive do
   alias Chax.Chat.{Message, Room}
   alias Chax.Accounts
   alias Chax.Accounts.User
+  alias ChaxWeb.OnlineUsers
 
   def render(assigns) do
     ~H"""
@@ -34,7 +35,7 @@ defmodule ChaxWeb.ChatRoomLive do
               <.user
                 :for={user <- @users}
                 user={user}
-                online={true}
+                online={OnlineUsers.online?(@online_users, user.id)}
               />
             </div>
           </div>
@@ -220,14 +221,21 @@ defmodule ChaxWeb.ChatRoomLive do
   # Mount is not called when patch is used in <.link>
   def mount(_params, _session, socket) do
     rooms = Chat.list_rooms()
-    timezone = get_connect_params(socket)["timezone"]
     users = Accounts.list_users()
+
+    timezone = get_connect_params(socket)["timezone"]
+
+    if connected?(socket) do
+      OnlineUsers.track(self(), socket.assigns.current_user)
+    end
 
     socket =
       socket
       |> assign(:rooms, rooms)
       |> assign(:timezone, timezone)
       |> assign(:users, users)
+      |> assign(:online_users, OnlineUsers.list())
+
     {:ok, socket}
   end
 
