@@ -2,7 +2,7 @@ defmodule Chax.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Chax.Chat.{Room, RoomMembership}
+  alias Chax.Chat.{Reaction, Room, RoomMembership}
 
   schema "users" do
     field :email, :string
@@ -12,6 +12,8 @@ defmodule Chax.Accounts.User do
     field :confirmed_at, :utc_datetime
     field :username, :string
     field :avatar_path, :string
+
+    has_many :reactions, Reaction
     many_to_many :rooms, Room, join_through: RoomMembership
 
     timestamps(type: :utc_datetime)

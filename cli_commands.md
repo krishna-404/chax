@@ -81,3 +81,10 @@ mix phx.gen.schema Chat.Reply replies \
  message_id:references:messages user_id:references:users body:text
 mix ecto.migrate
 ```
+
+## Generate migration allow users to add reactions to messages
+```bash
+mix phx.gen.schema Chat.Reaction reactions user_id:references:users \
+    message_id:references:messages emoji:string
+mix ecto.migrate
+```
