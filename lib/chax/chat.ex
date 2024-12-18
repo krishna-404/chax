@@ -1,6 +1,6 @@
 defmodule Chax.Chat do
   alias Chax.Accounts.User
-  alias Chax.Chat.{Message, Room, RoomMembership}
+  alias Chax.Chat.{Message, Reply, Room, RoomMembership}
   alias Chax.Repo
 
   import Ecto.Changeset
@@ -14,7 +14,7 @@ defmodule Chax.Chat do
 
   def create_message(room, attrs, user) do
     with {:ok, message} <-
-      %Message{room: room, user: user}
+      %Message{room: room, user: user, replies: []}
       |> Message.changeset(attrs)
       |> Repo.insert() do
         Phoenix.PubSub.broadcast!(@pubsub, topic(room.id), {:new_message, message})
@@ -59,9 +59,10 @@ defmodule Chax.Chat do
   end
 
   def get_message!(id) do
+
     Message
     |> where([m], m.id == ^id)
-    |> preload(:user)
+    |> preload_message_user_and_replies()
     |> Repo.one!()
   end
 
@@ -81,8 +82,14 @@ defmodule Chax.Chat do
     Message
     |> where([m], m.room_id == ^room_id)
     |> order_by([m], asc: :inserted_at, asc: :id)
-    |> preload([:user])
+    |> preload_message_user_and_replies()
     |> Repo.all()
+  end
+
+  defp preload_message_user_and_replies(message_query) do
+    replies_query = from r in Reply, order_by: [asc: :inserted_at, asc: :id]
+
+    preload(message_query, [:user, replies: ^{replies_query, [:user]}])
   end
 
   def list_joined_rooms_with_unread_count(%User{} = user) do
