@@ -9,20 +9,35 @@ defmodule ChaxWeb.ChatComponents do
   attr :current_user, User, required: true
   attr :dom_id, :string, required: true
   attr :message, Message, required: true
+  attr :in_thread?, :boolean, default: false
   attr :timezone, :string, required: true
 
   def message(assigns) do
     ~H"""
     <div id={@dom_id} class="group relative flex px-4 py-3">
-      <button
-        :if={@current_user.id == @message.user_id}
-        class="absolute top-4 right-4 text-red-500 hover:text-red-800 cursor-pointer hidden group-hover:block"
-        data-confirm="Are you sure?"
-        phx-click="delete-message"
-        phx-value-id={@message.id}
+      <div
+        :if={!@in_thread? || @current_user.id == @message.user_id}
+        class="absolute top-4 right-4 hidden group-hover:block bg-white shadow-sm px-2 pb-1 rounded border border-px border-slate-300 gap-1"
       >
-        <.icon name="hero-trash" class="h-4 w-4" />
-      </button>
+        <button
+          :if={!@in_thread?}
+          phx-click="show-thread"
+          phx-value-id={@message.id}
+          class="text-slate-500 hover:text-slate-600 cursor-pointer"
+        >
+          <.icon name="hero-chat-bubble-bottom-center-text" class="h-4 w-4" />
+        </button>
+
+        <button
+          :if={@current_user.id == @message.user_id}
+          class="text-red-500 hover:text-red-800 cursor-pointer"
+          data-confirm="Are you sure?"
+          phx-click="delete-message"
+          phx-value-id={@message.id}
+        >
+          <.icon name="hero-trash" class="h-4 w-4" />
+        </button>
+      </div>
       <.user_avatar
         user={@message.user}
         class="h-10 w-10 rounded cursor-pointer"

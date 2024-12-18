@@ -379,7 +379,6 @@ defmodule ChaxWeb.ChatRoomLive do
     Chat.update_last_read_id(room, current_user)
 
     socket
-    |> assign(:thread, messages |> Enum.filter(&is_struct(&1, Message)) |> List.last())
     |> assign(:room, room)
     |> assign(:hide_topic?, false)
     |> assign(:joined?, Chat.joined?(room, current_user))
@@ -437,7 +436,7 @@ defmodule ChaxWeb.ChatRoomLive do
 
   def handle_event("show-profile", %{"user-id" => user_id}, socket) do
     user = Accounts.get_user!(user_id)
-    {:noreply, assign(socket, :profile, user)}
+    {:noreply, assign(socket, profile: user, thread: nil)}
   end
 
   def handle_event("toggle-topic", _params, socket) do
@@ -483,6 +482,16 @@ defmodule ChaxWeb.ChatRoomLive do
     socket = assign(socket, joined?: true, rooms: Chat.list_joined_rooms_with_unread_count(current_user))
 
     socket |> noreply()
+  end
+
+  def handle_event("close-thread", _, socket) do
+    {:noreply, assign(socket, :thread, nil)}
+  end
+
+  def handle_event("show-thread", %{"id" => message_id}, socket) do
+    message = Chat.get_message!(message_id)
+
+    socket |> assign(profile: nil, thread: message) |> noreply()
   end
 
   def handle_info({:new_message, message}, socket) do

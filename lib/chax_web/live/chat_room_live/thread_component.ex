@@ -24,6 +24,7 @@ defmodule ChaxWeb.ChatRoomLive.ThreadComponent do
             message={@message}
             dom_id="thread-message"
             current_user={@current_user}
+            in_thread?
             timezone={@timezone}
           />
         </div>

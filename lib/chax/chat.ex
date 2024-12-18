@@ -58,6 +58,13 @@ defmodule Chax.Chat do
     end
   end
 
+  def get_message!(id) do
+    Message
+    |> where([m], m.id == ^id)
+    |> preload(:user)
+    |> Repo.one!()
+  end
+
   def get_room!(id) do
     Repo.get!(Room, id)
   end

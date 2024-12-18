@@ -74,3 +74,10 @@ mix ecto.migrate
 mix ecto.gen.migration add_username_to_users
 mix ecto.migrate
 ```
+
+## Generate a migration to create replies
+```bash
+mix phx.gen.schema Chat.Reply replies \
+ message_id:references:messages user_id:references:users body:text
+mix ecto.migrate
+```
