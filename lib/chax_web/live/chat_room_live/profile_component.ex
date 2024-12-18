@@ -1,5 +1,6 @@
 defmodule ChaxWeb.ChatRoomLive.ProfileComponent do
   use ChaxWeb, :live_component
+  import ChaxWeb.UserComponents
 
   def render(assigns) do
     ~H"""
@@ -19,7 +20,7 @@ defmodule ChaxWeb.ChatRoomLive.ProfileComponent do
       </div>
       <div class="flex flex-col flex-grow overflow-auto p-4">
         <div class="mb-4">
-          <img src={~p"/images/one_ring.jpg"} class="w-48 rounded mx-auto" />
+          <.user_avatar user={@user} class="h-8 w-8 rounded" />
         </div>
         <h2 class="text-xl font-bold text-gray-800">
           <%= @user.username %>
