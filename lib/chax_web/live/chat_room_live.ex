@@ -212,6 +212,7 @@ defmodule ChaxWeb.ChatRoomLive do
       <.live_component
         current_user={@current_user}
         id="thread"
+        joined?={@joined?}
         module={ThreadComponent}
         message={@thread}
         room={@room}
@@ -501,17 +502,14 @@ defmodule ChaxWeb.ChatRoomLive do
   end
 
   def handle_info({:deleted_reply, message}, socket) do
-    if message.room_id == socket.assigns.room.id do
-      socket = stream_insert(socket, :messages, message)
+    socket
+    |> refresh_message(message)
+    |> noreply()
+  end
 
-      if socket.assigns[:thread] && socket.assigns.thread.id == message.id do
-        assign(socket, :thread, message)
-      else
-        socket
-      end
-    else
-      socket
-    end
+  def handle_info({:new_reply, message}, socket) do
+    socket
+    |> refresh_message(message)
     |> noreply()
   end
 
@@ -558,6 +556,20 @@ defmodule ChaxWeb.ChatRoomLive do
     |> maybe_update_current_user(user)
     |> push_event("update_avatar", %{user_id: user.id, avatar_path: user.avatar_path})
     |> noreply()
+  end
+
+  defp refresh_message(socket, message) do
+    if message.room_id == socket.assigns.room.id do
+      socket = stream_insert(socket, :messages, message)
+
+      if socket.assigns[:thread] && socket.assigns.thread.id == message.id do
+        assign(socket, :thread, message)
+      else
+        socket
+      end
+    else
+      socket
+    end
   end
 
   defp toggle_rooms() do
