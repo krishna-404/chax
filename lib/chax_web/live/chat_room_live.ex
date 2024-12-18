@@ -7,6 +7,8 @@ defmodule ChaxWeb.ChatRoomLive do
   alias Chax.Accounts.User
   alias ChaxWeb.OnlineUsers
 
+  import ChaxWeb.RoomComponents
+
   def render(assigns) do
     ~H"""
       <div class="flex flex-col flex-shrink-0 w-64 bg-slate-100">
@@ -207,18 +209,7 @@ defmodule ChaxWeb.ChatRoomLive do
 
     <.modal id="new-room-modal" show={@live_action == :new} on_cancel={JS.navigate(~p"/rooms/#{@room}")}>
       <.header>New chat room</.header>
-        <.simple_form
-          for={@new_room_form}
-          id="room-form"
-          phx-change="validate-room"
-          phx-submit="save-room"
-        >
-          <.input field={@new_room_form[:name]} type="text" label="Name" phx-debounce />
-          <.input field={@new_room_form[:topic]} type="text" label="Topic" phx-debounce />
-          <:actions>
-            <.button phx-disable-with="Saving..." class="w-full">Save</.button>
-          </:actions>
-        </.simple_form>
+       <.room_form form={@new_room_form} />
     </.modal>
     """
   end

@@ -3,6 +3,8 @@ defmodule ChaxWeb.ChatRoomEditLive do
 
   alias Chax.Chat
 
+  import ChaxWeb.RoomComponents
+
   def render(assigns) do
     ~H"""
       <div class="mx-auto w-96 mt-12">
@@ -17,18 +19,7 @@ defmodule ChaxWeb.ChatRoomEditLive do
             </.link>
           </:actions>
         </.header>
-        <.simple_form
-          id="room-form"
-          for={@form}
-          phx-change="validate-room"
-          phx-submit="save-room"
-        >
-        <.input field={@form[:name]} type="text" label="Name" phx-debounce/>
-        <.input field={@form[:topic]} type="text" label="Topic" phx-debounce/>
-        <:actions>
-          <.button phx-disable-with="Saving..." class="w-full">Save</.button>
-        </:actions>
-      </.simple_form>
+        <.room_form form={@form} />
       </div>
     """
   end
