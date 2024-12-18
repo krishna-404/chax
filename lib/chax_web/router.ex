@@ -17,12 +17,6 @@ defmodule ChaxWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", ChaxWeb do
-    pipe_through [:browser, :require_authenticated_user]
-
-    get "/home", PageController, :home
-  end
-
   # Other scopes may use custom stacks.
   # scope "/api", ChaxWeb do
   #   pipe_through :api
