@@ -54,6 +54,8 @@ defmodule ChaxWeb do
       use Phoenix.LiveView,
         layout: {ChaxWeb.Layouts, :app}
 
+      import ChaxWeb.SocketHelpers
+
       unquote(html_helpers())
     end
   end

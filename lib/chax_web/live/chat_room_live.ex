@@ -339,21 +339,19 @@ defmodule ChaxWeb.ChatRoomLive do
 
     Enum.each(rooms, fn {chat, _} -> Chat.subscribe_to_room(chat) end)
 
-    socket =
-      socket
-      |> assign(:rooms, rooms)
-      |> assign(:timezone, timezone)
-      |> assign(:users, users)
-      |> assign(:online_users, OnlineUsers.list())
-      |> assign_room_form(Chat.change_room(%Room{}))
-      |> stream_configure(:messages,
-        dom_id: fn
-          %Message{id: id} -> "message-#{id}"
-          :unread_marker -> "messages-unread-marker"
-        end
-      )
-
-    {:ok, socket}
+    socket
+    |> assign(:rooms, rooms)
+    |> assign(:timezone, timezone)
+    |> assign(:users, users)
+    |> assign(:online_users, OnlineUsers.list())
+    |> assign_room_form(Chat.change_room(%Room{}))
+    |> stream_configure(:messages,
+      dom_id: fn
+        %Message{id: id} -> "message-#{id}"
+        :unread_marker -> "messages-unread-marker"
+      end
+    )
+    |> ok()
   end
 
   def assign_room_form(socket, changeset) do
@@ -377,7 +375,7 @@ defmodule ChaxWeb.ChatRoomLive do
 
     Chat.update_last_read_id(room, current_user)
 
-    socket = socket
+    socket
       |> assign(:room, room)
       |> assign(:hide_topic?, false)
       |> assign(:joined?, Chat.joined?(room, current_user))
@@ -393,8 +391,7 @@ defmodule ChaxWeb.ChatRoomLive do
           other -> other
         end)
       end)
-
-    {:noreply, socket}
+      |> noreply()
   end
 
   defp assign_message_form(socket, changeset) do
@@ -414,12 +411,12 @@ defmodule ChaxWeb.ChatRoomLive do
   end
 
   def handle_event("toggle-topic", _params, socket) do
-    {:noreply, socket |> update(:hide_topic?, &(!&1))}
+    socket |> update(:hide_topic?, &(!&1)) |> noreply()
   end
 
   def handle_event("validate-message", %{"message" => message_params}, socket) do
     changeset = Chat.change_message(%Message{}, message_params)
-    {:noreply, socket |> assign_message_form(changeset)}
+    socket |> assign_message_form(changeset) |> noreply()
   end
 
   def handle_event("validate-room", %{"room" => room_params}, socket) do
@@ -428,7 +425,7 @@ defmodule ChaxWeb.ChatRoomLive do
       |> Chat.change_room(room_params)
       |> Map.put(:action, :validate)
 
-    {:noreply, socket |> assign_room_form(changeset)}
+    socket |> assign_room_form(changeset) |> noreply()
   end
 
   def handle_event("submit-message", %{"message" => message_params}, socket) do
@@ -447,12 +444,12 @@ defmodule ChaxWeb.ChatRoomLive do
         socket
       end
 
-    {:noreply, socket}
+    socket |> noreply()
   end
 
   def handle_event("delete-message", %{"id" => id}, socket) do
     Chat.delete_message_by_id(id, socket.assigns.current_user)
-    {:noreply, socket}
+    socket |> noreply()
   end
 
   def handle_event("join-room", _, socket) do
@@ -464,7 +461,7 @@ defmodule ChaxWeb.ChatRoomLive do
 
     socket = assign(socket, joined?: true, rooms: Chat.list_joined_rooms_with_unread_count(current_user))
 
-    {:noreply, socket}
+    socket |> noreply()
   end
 
   def handle_event("save-room", %{"room" => room_params}, socket) do
@@ -472,13 +469,13 @@ defmodule ChaxWeb.ChatRoomLive do
       {:ok, room} ->
         Chat.join_room!(room, socket.assigns.current_user)
 
-        {:noreply,
-         socket
-         |> put_flash(:info, "Created room")
-         |> push_navigate(to: ~p"/rooms/#{room}")}
+        socket
+        |> put_flash(:info, "Created room")
+        |> push_navigate(to: ~p"/rooms/#{room}")
+        |> noreply()
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_room_form(socket, changeset)}
+        socket |> assign_room_form(changeset) |> noreply()
     end
   end
 
@@ -507,16 +504,16 @@ defmodule ChaxWeb.ChatRoomLive do
       end
 
 
-    {:noreply, socket}
+    socket |> noreply()
   end
 
   def handle_info({:message_deleted, message}, socket) do
-    {:noreply, stream_delete(socket, :messages, message)}
+    socket |> stream_delete(:messages, message) |> noreply()
   end
 
   def handle_info(%{event: "presence_diff", payload: diff}, socket) do
     online_users = OnlineUsers.update(socket.assigns.online_users, diff)
-    {:noreply, socket |> assign(:online_users, online_users)}
+    socket |> assign(:online_users, online_users) |> noreply()
   end
 
   defp toggle_rooms() do
