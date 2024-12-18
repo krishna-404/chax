@@ -198,7 +198,12 @@ defmodule ChaxWeb.ChatRoomLive do
     </div>
 
     <%= if assigns[:profile] do %>
-      <.live_component id="profile" module={ChaxWeb.ChatRoomLive.ProfileComponent} user={@profile} />
+      <.live_component
+        id="profile"
+        module={ChaxWeb.ChatRoomLive.ProfileComponent}
+        user={@profile}
+        current_user={@current_user}
+      />
     <% end %>
 
     <.modal id="new-room-modal" show={@live_action == :new} on_cancel={JS.navigate(~p"/rooms/#{@room}")}>
