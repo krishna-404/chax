@@ -69,6 +69,9 @@ defmodule ChaxWeb.ChatComponents do
                   me? && "bg-blue-100 border border-blue-400",
                   !me? && "bg-slate-200 hover:bg-slate-400"
                 ]}
+                phx-click={if me?, do: "remove-reaction", else: "add-reaction"}
+                phx-value-emoji={emoji}
+                phx-value-message_id={@message.id}
               >
                 <span><%= emoji %></span>
                 <span class="ml-1 font-medium"><%= count %></span>
