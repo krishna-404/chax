@@ -371,6 +371,8 @@ defmodule ChaxWeb.ChatRoomLive do
 
     OnlineUsers.subscribe()
 
+    Accounts.subscribe_to_user_avatars()
+
     Enum.each(rooms, fn {chat, _} -> Chat.subscribe_to_room(chat) end)
 
     socket
@@ -552,6 +554,13 @@ defmodule ChaxWeb.ChatRoomLive do
     socket |> assign(:online_users, online_users) |> noreply()
   end
 
+  def handle_info({:updated_avatar, user}, socket) do
+    socket
+    |> maybe_update_profile(user)
+    |> maybe_update_current_user(user)
+    |> noreply()
+  end
+
   defp toggle_rooms() do
     JS.toggle(to: "#rooms-toggler-chevron-down")
     |> JS.toggle(to: "#rooms-toggler-chevron-right")
@@ -562,5 +571,21 @@ defmodule ChaxWeb.ChatRoomLive do
     JS.toggle(to: "#users-toggler-chevron-down")
     |> JS.toggle(to: "#users-toggler-chevron-right")
     |> JS.toggle(to: "#users-list")
+  end
+
+  defp maybe_update_current_user(socket, user) do
+    if socket.assigns.current_user.id == user.id do
+      assign(socket, :current_user, user)
+    else
+      socket
+    end
+  end
+
+  defp maybe_update_profile(socket, user) do
+    if socket.assigns[:profile] && socket.assigns.profile.id == user.id do
+      assign(socket, :profile, user)
+    else
+      socket
+    end
   end
 end
