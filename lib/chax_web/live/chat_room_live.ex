@@ -116,6 +116,15 @@ defmodule ChaxWeb.ChatRoomLive do
             </li>
           </ul>
         </div>
+        <div :if={@message_cursor} class="flex justify-around my-2">
+          <button
+            id="load-more-button"
+            phx-click="load-more-messages"
+            class="border border-green-200 bg-green-50 py-1 px-3 rounded"
+          >
+            Load more
+          </button>
+        </div>
         <div
           id="room-messages"
           class="flex flex-col flex-grow overflow-auto"
@@ -368,25 +377,24 @@ defmodule ChaxWeb.ChatRoomLive do
       :error ->
         Chat.get_first_room!()
     end
+
+    page = Chat.list_messages_in_room(room)
+
     IO.inspect(room, label: "room")
     current_user = socket.assigns.current_user
 
     last_read_id = Chat.get_last_read_id(room, current_user)
 
-    messages =
-      room
-      |> Chat.list_messages_in_room()
-      |> insert_date_dividers(socket.assigns.timezone)
-      |> maybe_insert_unread_marker(last_read_id)
-
     Chat.update_last_read_id(room, current_user)
 
     socket
     |> assign(:room, room)
+    |> assign(:last_read_id, last_read_id)
     |> assign(:hide_topic?, false)
     |> assign(:joined?, Chat.joined?(room, current_user))
     |> assign(:page_title, "#" <> room.name)
-    |> stream(:messages, messages, reset: true)
+    |> stream(:messages, [], reset: true)
+    |> stream_message_page(page)
       |> assign_message_form(Chat.change_message(%Message{})) # To reset the message form on room change
       |> push_event("scroll_messages_to_bottom", %{})
       |> update(:rooms, fn rooms ->
@@ -398,6 +406,21 @@ defmodule ChaxWeb.ChatRoomLive do
         end)
       end)
       |> noreply()
+  end
+
+  defp stream_message_page(socket, %Paginator.Page{} = page) do
+    last_read_id = socket.assigns.last_read_id
+
+    messages =
+      page.entries
+      |> Enum.reverse()
+      |> insert_date_dividers(socket.assigns.timezone)
+      |> maybe_insert_unread_marker(last_read_id)
+      |> Enum.reverse()
+
+    socket
+    |> stream(:messages, messages, at: 0)
+    |> assign(:message_cursor, page.metadata.after)
   end
 
   defp insert_date_dividers(messages, nil), do: messages
@@ -449,6 +472,18 @@ defmodule ChaxWeb.ChatRoomLive do
   def handle_event("validate-message", %{"message" => message_params}, socket) do
     changeset = Chat.change_message(%Message{}, message_params)
     socket |> assign_message_form(changeset) |> noreply()
+  end
+
+  def handle_event("load-more-messages", _, socket) do
+    page =
+      Chat.list_messages_in_room(
+        socket.assigns.room,
+        after: socket.assigns.message_cursor
+      )
+
+    socket
+    |> stream_message_page(page)
+    |> noreply()
   end
 
   def handle_event("submit-message", %{"message" => message_params}, socket) do

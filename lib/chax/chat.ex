@@ -90,12 +90,16 @@ defmodule Chax.Chat do
     Repo.exists?(RoomMembership |> where([rm], rm.room_id == ^room.id and rm.user_id == ^user.id))
   end
 
-  def list_messages_in_room(%Room{id: room_id}) do
+  def list_messages_in_room(%Room{id: room_id}, opts \\ []) do
     Message
     |> where([m], m.room_id == ^room_id)
-    |> order_by([m], asc: :inserted_at, asc: :id)
     |> preload_message_user_and_replies()
-    |> Repo.all()
+    |> order_by([m], desc: :inserted_at, desc: :id)
+    |> Repo.paginate(
+      after: opts[:after],
+      limit: 3,
+      cursor_fields: [inserted_at: :desc, id: :desc]
+    )
   end
 
   defp preload_message_user_and_replies(message_query) do
