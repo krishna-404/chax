@@ -216,6 +216,7 @@ defmodule ChaxWeb.ChatRoomLive do
 
   attr :dom_id, :string, required: true
   attr :text, :string, required: true
+  attr :on_click, :fun, required: true
   defp toggler(assigns) do
     ~H"""
     <button id={@dom_id} phx-click={@on_click} class="flex items-center flex-grow focus:outline-none">
