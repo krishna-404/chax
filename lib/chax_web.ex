@@ -64,6 +64,8 @@ defmodule ChaxWeb do
     quote do
       use Phoenix.LiveComponent
 
+      import ChaxWeb.SocketHelpers
+
       unquote(html_helpers())
     end
   end

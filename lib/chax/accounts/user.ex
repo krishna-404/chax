@@ -106,7 +106,7 @@ defmodule Chax.Accounts.User do
   defp maybe_validate_unique_username(changeset, opts) do
     if Keyword.get(opts, :validate_username, true) do
       changeset
-      |> unsafe_validate_unique(:username, Slax.Repo)
+      |> unsafe_validate_unique(:username, Chax.Repo)
       |> unique_constraint(:username)
     else
       changeset

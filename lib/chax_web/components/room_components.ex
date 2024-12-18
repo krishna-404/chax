@@ -4,9 +4,16 @@ defmodule ChaxWeb.RoomComponents do
   import ChaxWeb.CoreComponents
 
   attr :form, Phoenix.HTML.Form, required: true
+  attr :target, :any, required: true
   def room_form(assigns) do
     ~H"""
-    <.simple_form for={@form} id="room-form" phx-change="validate-room" phx-submit="save-room">
+    <.simple_form
+      for={@form}
+      id="room-form"
+      phx-change="validate-room"
+      phx-submit="save-room"
+      phx-target={@target}
+    >
       <.input field={@form[:name]} type="text" label="Name" />
       <.input field={@form[:topic]} type="text" label="Topic" />
       <:actions>
