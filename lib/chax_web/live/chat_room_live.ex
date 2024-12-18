@@ -123,13 +123,21 @@ defmodule ChaxWeb.ChatRoomLive do
         phx-hook="RoomMessages"
         phx-update="stream"
       >
-        <.message
-          :for={{dom_id, message} <- @streams.messages}
-          current_user={@current_user}
-          dom_id={dom_id}
-          message={message}
-          timezone={@timezone}
-        />
+        <%= for {dom_id, message} <- @streams.messages do %>
+          <%= if message == :unread_marker do %>
+            <div id={dom_id} class="w-full flex text-red-500 items-center gap-3 pr-5">
+              <div class="w-full h-px grow bg-red-500"></div>
+              <div class="text-sm">New</div>
+            </div>
+          <% else %>
+            <.message
+              current_user={@current_user}
+              dom_id={dom_id}
+              message={message}
+              timezone={@timezone}
+            />
+          <% end %>
+        <% end %>
      </div>
      <div :if={@joined?} class="h-12 bg-white px-4 pb-4">
         <.form
@@ -282,6 +290,12 @@ defmodule ChaxWeb.ChatRoomLive do
       |> assign(:timezone, timezone)
       |> assign(:users, users)
       |> assign(:online_users, OnlineUsers.list())
+      |> stream_configure(:messages,
+        dom_id: fn
+          %Message{id: id} -> "message-#{id}"
+          :unread_marker -> "messages-unread-marker"
+        end
+      )
 
     {:ok, socket}
   end
@@ -297,14 +311,20 @@ defmodule ChaxWeb.ChatRoomLive do
         Chat.get_first_room!()
     end
     IO.inspect(room, label: "room")
-    messages = Chat.list_messages_in_room(room)
+    current_user = socket.assigns.current_user
+
+    last_read_id = Chat.get_last_read_id(room, current_user)
+
+    messages = Chat.list_messages_in_room(room) |> maybe_insert_unread_marker(last_read_id)
+
+    Chat.uplate_last_read_id(room, current_user)
 
     Chat.subscribe_to_room(room)
 
     socket = socket
       |> assign(:room, room)
       |> assign(:hide_topic?, false)
-      |> assign(:joined?, Chat.joined?(room, socket.assigns.current_user))
+      |> assign(:joined?, Chat.joined?(room, current_user))
       |> assign(:page_title, "#" <> room.name)
       |> stream(:messages, messages, reset: true)
       |> assign_message_form(Chat.change_message(%Message{})) # To reset the message form on room change
@@ -315,6 +335,18 @@ defmodule ChaxWeb.ChatRoomLive do
 
   defp assign_message_form(socket, changeset) do
     assign(socket, :new_message_form, to_form(changeset))
+  end
+
+  defp maybe_insert_unread_marker(messages, nil), do: messages
+
+  defp maybe_insert_unread_marker(messages, last_read_id) do
+    {read, unread} = Enum.split_while(messages, &(&1.id <= last_read_id))
+
+    if unread == [] do
+      read
+    else
+      read ++ [:unread_marker | unread]
+    end
   end
 
   def handle_event("toggle-topic", _params, socket) do

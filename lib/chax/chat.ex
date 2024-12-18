@@ -3,6 +3,7 @@ defmodule Chax.Chat do
   alias Chax.Chat.{Message, Room, RoomMembership}
   alias Chax.Repo
 
+  import Ecto.Changeset
   import Ecto.Query
 
   @pubsub Chax.PubSub
@@ -46,6 +47,15 @@ defmodule Chax.Chat do
 
   def get_first_room! do
     Repo.one!(Room |> order_by([asc: :name]) |> limit(1))
+  end
+
+  def get_last_read_id(%Room{} = room, %User{} = user) do
+    case get_membership(room, user) do
+      %RoomMembership{} = membership ->
+        membership.last_read_id
+      nil ->
+        nil
+    end
   end
 
   def get_room!(id) do
@@ -96,7 +106,7 @@ defmodule Chax.Chat do
   end
 
   def toggle_room_membership(room, user) do
-    case Repo.get_by(RoomMembership, room_id: room.id, user_id: user.id) do
+    case get_membership(room, user) do
       %RoomMembership{} = membership ->
         Repo.delete(membership)
       {room, false}
@@ -107,11 +117,32 @@ defmodule Chax.Chat do
     end
   end
 
+  defp get_membership(room, user) do
+    Repo.get_by(RoomMembership, room_id: room.id, user_id: user.id)
+  end
+
   def unsubscribe_from_room(room) do
     Phoenix.PubSub.unsubscribe(@pubsub, topic(room.id))
   end
 
   defp topic(room_id), do: "chat_room:#{room_id}"
+
+  def uplate_last_read_id(room, user) do
+    case get_membership(room, user) do
+      %RoomMembership{} = membership ->
+        id =
+          Message
+            |> where([m], m.room_id == ^room.id)
+            |> select([m], max(m.id))
+            |> Repo.one()
+
+        membership
+          |> change(%{last_read_id: id})
+          |> Repo.update!()
+      nil ->
+        nil
+    end
+  end
 
   def update_room(%Room{} = room, attrs) do
     room

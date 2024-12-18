@@ -62,3 +62,9 @@ mix phx.gen.presence
 mix phx.gen.schema Chat.RoomMembership room_memberships user_id:references:users room_id:references:rooms
 mix ecto.migrate
 ```
+
+## Generate a migration to add last_read_id to room_memberships
+```bash
+mix phx.gen.migration add_last_read_id_to_memberships
+mix ecto.migrate
+```
