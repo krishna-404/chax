@@ -75,77 +75,77 @@ defmodule ChaxWeb.ChatRoomLive do
         </div>
       </div>
       <div class="flex flex-col flex-grow shadow-lg">
-      <div class="flex justify-between items-center flex-shrink-0 h-16 bg-white border-b border-slate-300 px-4">
-        <div class="flex flex-col gap-1.5">
-          <h1 class="text-sm font-bold leading-none">
-            #{@room.name}
+        <div class="flex justify-between items-center flex-shrink-0 h-16 bg-white border-b border-slate-300 px-4">
+          <div class="flex flex-col gap-1.5">
+            <h1 class="text-sm font-bold leading-none">
+              #{@room.name}
 
-            <.link
-              :if={@joined?}
-              class="font-normal text-xs text-blue-600 hover:text-blue-700"
-              navigate={~p"/rooms/#{@room}/edit"}
-            >
-              Edit
-            </.link>
-          </h1>
-          <div class="text-xs leading-none h-3.5" phx-click="toggle-topic">
-            {(@hide_topic? && "Show topic") || @room.topic}
+              <.link
+                :if={@joined?}
+                class="font-normal text-xs text-blue-600 hover:text-blue-700"
+                navigate={~p"/rooms/#{@room}/edit"}
+              >
+                Edit
+              </.link>
+            </h1>
+            <div class="text-xs leading-none h-3.5" phx-click="toggle-topic">
+              {(@hide_topic? && "Show topic") || @room.topic}
+            </div>
           </div>
+          <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
+            <li class="text-[0.8125rem] leading-6 text-zinc-900">
+              <div class="text-sm leading-10">
+              <.link
+                class="flex gap-4 items-center"
+                phx-click="show-profile"
+                phx-value-user-id={@current_user.id}
+              >
+                <.user_avatar user={@current_user} class="h-8 w-8 rounded" />
+                <span class="hover:underline"><%= @current_user.username %></span>
+              </.link>
+            </div>
+            </li>
+            <li>
+              <.link
+                href={~p"/users/log_out"}
+                method="delete"
+                class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+              >
+                Log out
+              </.link>
+            </li>
+          </ul>
         </div>
-        <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
-          <li class="text-[0.8125rem] leading-6 text-zinc-900">
-            <div class="text-sm leading-10">
-             <.link
-               class="flex gap-4 items-center"
-               phx-click="show-profile"
-               phx-value-user-id={@current_user.id}
-             >
-               <.user_avatar user={@current_user} class="h-8 w-8 rounded" />
-               <span class="hover:underline"><%= @current_user.username %></span>
-             </.link>
-           </div>
-          </li>
-          <li>
-            <.link
-              href={~p"/users/log_out"}
-              method="delete"
-              class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-            >
-              Log out
-            </.link>
-          </li>
-        </ul>
-      </div>
-      <div
-        id="room-messages"
-        class="flex flex-col flex-grow overflow-auto"
-        phx-hook="RoomMessages"
-        phx-update="stream"
-      >
-        <%= for {dom_id, message} <- @streams.messages do %>
-          <%= case message do %>
-            <% :unread_marker -> %>
-              <div id={dom_id} class="w-full flex text-red-500 items-center gap-3 pr-5">
-                <div class="w-full h-px grow bg-red-500"></div>
-                <div class="text-sm">New</div>
-              </div>
-            <% %Message{} -> %>
-              <.message
-                current_user={@current_user}
-                dom_id={dom_id}
-                message={message}
-                timezone={@timezone}
-              />
-            <% %Date{} -> %>
-              <div id={dom_id} class="flex flex-col items-center mt-2">
-                <hr class="w-full" />
-                <span class="flex items-center justify-center -mt-3 bg-white h-6 px-3 rounded-full border text-xs font-semibold mx-auto">
-                  <%= format_date(message) %>
-                </span>
-              </div>
+        <div
+          id="room-messages"
+          class="flex flex-col flex-grow overflow-auto"
+          phx-hook="RoomMessages"
+          phx-update="stream"
+        >
+          <%= for {dom_id, message} <- @streams.messages do %>
+            <%= case message do %>
+              <% :unread_marker -> %>
+                <div id={dom_id} class="w-full flex text-red-500 items-center gap-3 pr-5">
+                  <div class="w-full h-px grow bg-red-500"></div>
+                  <div class="text-sm">New</div>
+                </div>
+              <% %Message{} -> %>
+                <.message
+                  current_user={@current_user}
+                  dom_id={dom_id}
+                  message={message}
+                  timezone={@timezone}
+                />
+              <% %Date{} -> %>
+                <div id={dom_id} class="flex flex-col items-center mt-2">
+                  <hr class="w-full" />
+                  <span class="flex items-center justify-center -mt-3 bg-white h-6 px-3 rounded-full border text-xs font-semibold mx-auto">
+                    <%= format_date(message) %>
+                  </span>
+                </div>
+            <% end %>
           <% end %>
-        <% end %>
-     </div>
+        </div>
      <div :if={@joined?} class="h-12 bg-white px-4 pb-4">
         <.form
           id="new-message-form"
@@ -163,7 +163,9 @@ defmodule ChaxWeb.ChatRoomLive do
             phx-debounce
             phx-hook="ChatMessageTextarea"
             rows="1"
-          ><%= Phoenix.HTML.Form.normalize_value("textarea", @new_message_form[:body].value) %></textarea>
+          >
+            <%= Phoenix.HTML.Form.normalize_value("textarea", @new_message_form[:body].value) %>
+          </textarea>
           <button class="flex-shrink flex items-center justify-center h-6 w-6 rounded hover:bg-slate-200">
             <.icon name="hero-paper-airplane" class="h-4 w-4" />
           </button>
@@ -508,7 +510,11 @@ defmodule ChaxWeb.ChatRoomLive do
   end
 
   def handle_info({:new_reply, message}, socket) do
-    socket
+    if socket.assigns[:thread] && socket.assigns.thread.id == message.id do
+      push_event(socket, "scroll_thread_to_bottom", %{})
+    else
+      socket
+    end
     |> refresh_message(message)
     |> noreply()
   end
