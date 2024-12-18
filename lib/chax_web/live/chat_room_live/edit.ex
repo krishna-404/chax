@@ -19,7 +19,7 @@ defmodule ChaxWeb.ChatRoomEditLive do
             </.link>
           </:actions>
         </.header>
-        <.room_form form={@form} />
+        <.room_form form={@form} target={nil} />
       </div>
     """
   end

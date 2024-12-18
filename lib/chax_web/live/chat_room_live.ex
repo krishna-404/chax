@@ -272,11 +272,11 @@ defmodule ChaxWeb.ChatRoomLive do
           <.icon name="hero-trash" class="h-4 w-4" />
         </button>
         <img
-        class="h-10 w-10 rounded cursor-pointer"
-        phx-click="show-profile"
-        phx-value-user-id={@message.user.id}
-        src={~p"/images/one_ring.jpg"}
-      />
+          class="h-10 w-10 rounded cursor-pointer"
+          phx-click="show-profile"
+          phx-value-user-id={@message.user.id}
+          src={src={user_avatar_path(@message.user)}}
+        />
         <div class="ml-2">
           <div class="-mt-1">
           <.link
@@ -285,16 +285,24 @@ defmodule ChaxWeb.ChatRoomLive do
             class="text-sm font-semibold hover:underline"
           >
             <%= @message.user.username %>
-            </.link>
-            <%!-- Timezone is not nil during the initial render when the socket is not connected yet --%>
-            <span :if={@timezone} class="ml-1 text-xs text-gray-500">
-              <%= message_timestamp(@message, @timezone) %>
-            </span>
-            <p class="text-sm"><%= @message.body %></p>
+          </.link>
+          <%!-- Timezone is not nil during the initial render when the socket is not connected yet --%>
+          <span :if={@timezone} class="ml-1 text-xs text-gray-500">
+            <%= message_timestamp(@message, @timezone) %>
+          </span>
+          <p class="text-sm"><%= @message.body %></p>
           </div>
         </div>
       </div>
     """
+  end
+
+  defp user_avatar_path(user) do
+    if user.avatar_path do
+      ~p"/uploads/#{user.avatar_path}"
+    else
+      ~p"/images/one_ring.jpg"
+    end
   end
 
   attr :count, :integer, required: true
@@ -438,10 +446,6 @@ defmodule ChaxWeb.ChatRoomLive do
     assign(socket, :new_message_form, to_form(changeset))
   end
 
-  def handle_event("close-profile", _, socket) do
-    {:noreply, assign(socket, :profile, nil)}
-  end
-
   defp maybe_insert_unread_marker(messages, nil), do: messages
 
   defp maybe_insert_unread_marker(messages, last_read_id) do
@@ -456,6 +460,10 @@ defmodule ChaxWeb.ChatRoomLive do
     else
       read ++ [:unread_marker | unread]
     end
+  end
+
+  def handle_event("close-profile", _, socket) do
+    {:noreply, assign(socket, :profile, nil)}
   end
 
   def handle_event("show-profile", %{"user-id" => user_id}, socket) do
