@@ -118,13 +118,23 @@ defmodule Chax.Chat do
     Repo.all(Room |> order_by([asc: :name]))
   end
 
-  def list_rooms_with_joined(%User{} = user) do
+  @room_page_size 10
+
+  def count_room_pages do
+    ceil(Repo.aggregate(Room, :count) / @room_page_size)
+  end
+
+  def list_rooms_with_joined(page, %User{} = user) do
+    offset = (page - 1) * @room_page_size
+
     query =
       from r in Room,
         left_join: rm in RoomMembership,
         on: rm.room_id == r.id and rm.user_id == ^user.id,
         select: {r, not is_nil(rm.id)},
-        order_by: [asc: :name]
+        order_by: [asc: :name],
+        limit: ^@room_page_size,
+        offset: ^offset
 
     Repo.all(query)
   end
