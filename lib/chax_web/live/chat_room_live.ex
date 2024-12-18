@@ -5,8 +5,10 @@ defmodule ChaxWeb.ChatRoomLive do
   alias Chax.Chat.{Message, Room}
   alias Chax.Accounts
   alias Chax.Accounts.User
+  alias ChaxWeb.ChatRoomLive.ThreadComponent
   alias ChaxWeb.OnlineUsers
 
+  import ChaxWeb.ChatComponents
   import ChaxWeb.UserComponents
 
   def render(assigns) do
@@ -206,6 +208,17 @@ defmodule ChaxWeb.ChatRoomLive do
       />
     <% end %>
 
+    <%= if assigns[:thread] do %>
+      <.live_component
+        current_user={@current_user}
+        id="thread"
+        module={ThreadComponent}
+        message={@thread}
+        room={@room}
+        timezone={@timezone}
+      />
+    <% end %>
+
     <.modal id="new-room-modal" show={@live_action == :new} on_cancel={JS.navigate(~p"/rooms/#{@room}")}>
       <.header>New chat room</.header>
       <.live_component
@@ -262,48 +275,6 @@ defmodule ChaxWeb.ChatRoomLive do
     """
   end
 
-  attr :current_user, User, required: true
-  attr :dom_id, :string, required: true
-  attr :message, Message, required: true
-  attr :timezone, :string, required: true
-  defp message(assigns) do
-    ~H"""
-      <div id={@dom_id} class="group relative flex px-4 py-3">
-        <button
-          :if={@current_user.id == @message.user_id}
-          class="absolute top-4 right-4 text-red-500 hover:text-red-800 cursor-pointer hidden group-hover:block"
-          data-confirm="Are you sure?"
-          phx-click="delete-message"
-          phx-value-id={@message.id}
-        >
-          <.icon name="hero-trash" class="h-4 w-4" />
-        </button>
-        <.user_avatar
-          user={@message.user}
-          class="h-10 w-10 rounded cursor-pointer"
-          phx-click="show-profile"
-          phx-value-user-id={@message.user.id}
-        />
-        <div class="ml-2">
-          <div class="-mt-1">
-          <.link
-            phx-click="show-profile"
-            phx-value-user-id={@message.user.id}
-            class="text-sm font-semibold hover:underline"
-          >
-            <%= @message.user.username %>
-          </.link>
-          <%!-- Timezone is not nil during the initial render when the socket is not connected yet --%>
-          <span :if={@timezone} class="ml-1 text-xs text-gray-500">
-            <%= message_timestamp(@message, @timezone) %>
-          </span>
-          <p class="text-sm"><%= @message.body %></p>
-          </div>
-        </div>
-      </div>
-    """
-  end
-
   attr :count, :integer, required: true
   defp unread_message_counter(assigns) do
     ~H"""
@@ -331,10 +302,6 @@ defmodule ChaxWeb.ChatRoomLive do
         <span class="ml-2 leading-none"><%= @user.username %></span>
       </.link>
     """
-  end
-
-  defp message_timestamp(message, timezone) do
-    message.inserted_at |> Timex.Timezone.convert(timezone) |> Timex.format!("%-l:%M %p", :strftime)
   end
 
   attr :active, :boolean, required: true
@@ -412,11 +379,12 @@ defmodule ChaxWeb.ChatRoomLive do
     Chat.update_last_read_id(room, current_user)
 
     socket
-      |> assign(:room, room)
-      |> assign(:hide_topic?, false)
-      |> assign(:joined?, Chat.joined?(room, current_user))
-      |> assign(:page_title, "#" <> room.name)
-      |> stream(:messages, messages, reset: true)
+    |> assign(:thread, messages |> Enum.filter(&is_struct(&1, Message)) |> List.last())
+    |> assign(:room, room)
+    |> assign(:hide_topic?, false)
+    |> assign(:joined?, Chat.joined?(room, current_user))
+    |> assign(:page_title, "#" <> room.name)
+    |> stream(:messages, messages, reset: true)
       |> assign_message_form(Chat.change_message(%Message{})) # To reset the message form on room change
       |> push_event("scroll_messages_to_bottom", %{})
       |> update(:rooms, fn rooms ->
