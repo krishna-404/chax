@@ -5,7 +5,7 @@ defmodule ChaxWeb.UserForgotPasswordLive do
 
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-sm">
+    <div class="mx-auto w-96 mt-16">
       <.header class="text-center">
         Forgot your password?
         <:subtitle>We'll send a password reset link to your inbox</:subtitle>
@@ -42,9 +42,9 @@ defmodule ChaxWeb.UserForgotPasswordLive do
     info =
       "If your email is in our system, you will receive instructions to reset your password shortly."
 
-    {:noreply,
-     socket
-     |> put_flash(:info, info)
-     |> redirect(to: ~p"/")}
+    socket
+    |> put_flash(:info, info)
+    |> redirect(to: ~p"/users/log_in")
+    |> noreply()
   end
 end
