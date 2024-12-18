@@ -558,6 +558,7 @@ defmodule ChaxWeb.ChatRoomLive do
     socket
     |> maybe_update_profile(user)
     |> maybe_update_current_user(user)
+    |> push_event("update_avatar", %{user_id: user.id, avatar_path: user.avatar_path})
     |> noreply()
   end
 

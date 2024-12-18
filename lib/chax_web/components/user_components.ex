@@ -7,10 +7,7 @@ defmodule ChaxWeb.UserComponents do
   attr :rest, :global, include: [:action] # To force user_avatar/1 to treat action like a global attribute, pass an :include option to attr/3:
   def user_avatar(assigns) do
     ~H"""
-    <img
-      src={user_avatar_path(@user)}
-      {@rest}
-    >
+    <img data-user-avatar-id={@user.id} src={user_avatar_path(@user)} {@rest} />
     """
   end
 
