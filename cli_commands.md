@@ -88,3 +88,9 @@ mix phx.gen.schema Chat.Reaction reactions user_id:references:users \
     message_id:references:messages emoji:string
 mix ecto.migrate
 ```
+
+## Add a emoji picker to the chat
+```bash
+cd assets
+npm install --save emoji-mart @emoji-mart/data
+```

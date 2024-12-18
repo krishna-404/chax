@@ -230,6 +230,8 @@ defmodule ChaxWeb.ChatRoomLive do
         current_user={@current_user}
       />
     </.modal>
+
+    <div id="emoji-picker-wrapper" class="absolute" phx-update="ignore"></div>
     """
   end
 
