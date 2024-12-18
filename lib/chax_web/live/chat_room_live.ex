@@ -116,15 +116,6 @@ defmodule ChaxWeb.ChatRoomLive do
             </li>
           </ul>
         </div>
-        <div :if={@message_cursor} class="flex justify-around my-2">
-          <button
-            id="load-more-button"
-            phx-click="load-more-messages"
-            class="border border-green-200 bg-green-50 py-1 px-3 rounded"
-          >
-            Load more
-          </button>
-        </div>
         <div
           id="room-messages"
           class="flex flex-col flex-grow overflow-auto"
@@ -395,17 +386,18 @@ defmodule ChaxWeb.ChatRoomLive do
     |> assign(:page_title, "#" <> room.name)
     |> stream(:messages, [], reset: true)
     |> stream_message_page(page)
-      |> assign_message_form(Chat.change_message(%Message{})) # To reset the message form on room change
-      |> push_event("scroll_messages_to_bottom", %{})
-      |> update(:rooms, fn rooms ->
-        room_id = room.id
+    |> assign_message_form(Chat.change_message(%Message{})) # To reset the message form on room change
+    |> push_event("reset_pagination", %{can_load_more: !is_nil(page.metadata.after)})
+    |> push_event("scroll_messages_to_bottom", %{})
+    |> update(:rooms, fn rooms ->
+      room_id = room.id
 
-        Enum.map(rooms, fn
-          {%Room{id: ^room_id} = room, _} -> {room, 0}
-          other -> other
-        end)
+      Enum.map(rooms, fn
+        {%Room{id: ^room_id} = room, _} -> {room, 0}
+        other -> other
       end)
-      |> noreply()
+    end)
+    |> noreply()
   end
 
   defp stream_message_page(socket, %Paginator.Page{} = page) do
@@ -483,7 +475,7 @@ defmodule ChaxWeb.ChatRoomLive do
 
     socket
     |> stream_message_page(page)
-    |> noreply()
+    |> reply(%{can_load_more: !is_nil(page.metadata.after)})
   end
 
   def handle_event("submit-message", %{"message" => message_params}, socket) do
