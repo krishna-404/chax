@@ -11,6 +11,7 @@ defmodule Chax.Chat.Room do
 
     many_to_many :users, User, join_through: RoomMembership
 
+    has_many :memberships, RoomMembership
     has_many :messages, Message
 
     timestamps(type: :utc_datetime)

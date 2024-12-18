@@ -78,11 +78,14 @@ defmodule Chax.Chat do
     |> Repo.all()
   end
 
-  def list_joined_rooms(%User{} = user) do
-    user
-    |> Repo.preload(:rooms)
-    |> Map.fetch!(:rooms)
-    |> Enum.sort_by(& &1.name)
+  def list_joined_rooms_with_unread_count(%User{} = user) do
+    Room
+    |> join(:inner, [r], rm in assoc(r, :memberships), on: rm.user_id == ^user.id)
+    |> join(:left, [r, rm], m in assoc(r, :messages), on: m.id > rm.last_read_id)
+    |> group_by([r], r.id)
+    |> select([r, rm, m], {r, count(m.id)})
+    |> order_by([r], asc: r.name)
+    |> Repo.all()
   end
 
   def list_rooms do
@@ -127,7 +130,7 @@ defmodule Chax.Chat do
 
   defp topic(room_id), do: "chat_room:#{room_id}"
 
-  def uplate_last_read_id(room, user) do
+  def update_last_read_id(room, user) do
     case get_membership(room, user) do
       %RoomMembership{} = membership ->
         id =
