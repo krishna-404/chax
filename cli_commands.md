@@ -68,3 +68,9 @@ mix ecto.migrate
 mix phx.gen.migration add_last_read_id_to_memberships
 mix ecto.migrate
 ```
+
+## Allow users to have usernames
+```
+mix ecto.gen.migration add_username_to_users
+mix ecto.migrate
+```
