@@ -207,7 +207,18 @@ defmodule ChaxWeb.ChatRoomLive do
 
     <.modal id="new-room-modal">
       <.header>New chat room</.header>
-      (Form goes here)
+        <.simple_form
+          for={@new_room_form}
+          id="room-form"
+          phx-change="validate-room"
+          phx-submit="save-room"
+        >
+          <.input field={@new_room_form[:name]} type="text" label="Name" phx-debounce />
+          <.input field={@new_room_form[:topic]} type="text" label="Topic" phx-debounce />
+          <:actions>
+            <.button phx-disable-with="Saving..." class="w-full">Save</.button>
+          </:actions>
+        </.simple_form>
     </.modal>
     """
   end
@@ -343,6 +354,7 @@ defmodule ChaxWeb.ChatRoomLive do
       |> assign(:timezone, timezone)
       |> assign(:users, users)
       |> assign(:online_users, OnlineUsers.list())
+      |> assign_room_form(Chat.change_room(%Room{}))
       |> stream_configure(:messages,
         dom_id: fn
           %Message{id: id} -> "message-#{id}"
@@ -351,6 +363,10 @@ defmodule ChaxWeb.ChatRoomLive do
       )
 
     {:ok, socket}
+  end
+
+  def assign_room_form(socket, changeset) do
+    assign(socket, :new_room_form, to_form(changeset))
   end
 
   @spec handle_params(map(), any(), map()) :: {:noreply, map()}
@@ -415,6 +431,15 @@ defmodule ChaxWeb.ChatRoomLive do
     {:noreply, socket |> assign_message_form(changeset)}
   end
 
+  def handle_event("validate-room", %{"room" => room_params}, socket) do
+    changeset =
+      socket.assigns.room
+      |> Chat.change_room(room_params)
+      |> Map.put(:action, :validate)
+
+    {:noreply, socket |> assign_room_form(changeset)}
+  end
+
   def handle_event("submit-message", %{"message" => message_params}, socket) do
     %{current_user: current_user, room: room} = socket.assigns
 
@@ -449,6 +474,21 @@ defmodule ChaxWeb.ChatRoomLive do
     socket = assign(socket, joined?: true, rooms: Chat.list_joined_rooms_with_unread_count(current_user))
 
     {:noreply, socket}
+  end
+
+  def handle_event("save-room", %{"room" => room_params}, socket) do
+    case Chat.create_room(room_params) do
+      {:ok, room} ->
+        Chat.join_room!(room, socket.assigns.current_user)
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "Created room")
+         |> push_navigate(to: ~p"/rooms/#{room}")}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        {:noreply, assign_room_form(socket, changeset)}
+    end
   end
 
   def handle_info({:new_message, message}, socket) do

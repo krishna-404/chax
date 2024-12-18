@@ -29,7 +29,7 @@ defmodule Chax.Chat do
   def create_room(attrs) do
     %Room{}
     |> Room.changeset(attrs)
-    |> Repo.insert!()
+    |> Repo.insert()
   end
 
   def delete_message_by_id(id, %User{id: user_id}) do
