@@ -104,29 +104,16 @@ defmodule ChaxWeb.ChatRoomLive do
               {(@hide_topic? && "Show topic") || @room.topic}
             </div>
           </div>
-          <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
-            <li class="text-[0.8125rem] leading-6 text-zinc-900">
-              <div class="text-sm leading-10">
-              <.link
-                class="flex gap-4 items-center"
-                phx-click="show-profile"
-                phx-value-user-id={@current_user.id}
-              >
-                <.user_avatar user={@current_user} class="h-8 w-8 rounded" />
-                <span class="hover:underline"><%= @current_user.username %></span>
-              </.link>
-            </div>
-            </li>
-            <li>
-              <.link
-                href={~p"/users/log_out"}
-                method="delete"
-                class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-              >
-                Log out
-              </.link>
-            </li>
-          </ul>
+          <div class="text-sm leading-10">
+            <.link
+              class="flex gap-4 items-center"
+              phx-click="show-profile"
+              phx-value-user-id={@current_user.id}
+            >
+              <.user_avatar user={@current_user} class="h-8 w-8 rounded" />
+              <span class="hover:underline"><%= @current_user.username %></span>
+            </.link>
+          </div>
         </div>
         <div
           id="room-messages"

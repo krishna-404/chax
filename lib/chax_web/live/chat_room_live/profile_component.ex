@@ -81,6 +81,19 @@ defmodule ChaxWeb.ChatRoomLive.ProfileComponent do
         <h2 class="text-xl font-bold text-gray-800">
           <%= @user.username %>
         </h2>
+
+        <%= if @current_user.id == @user.id do %>
+          <div class="mt-auto pt-4 border-t">
+            <.link
+              href={~p"/users/log_out"}
+              method="delete"
+              class="flex items-center justify-center w-full py-2 px-4 text-red-600 hover:text-red-700 font-semibold rounded hover:bg-red-50"
+            >
+              <.icon name="hero-arrow-right-on-rectangle" class="w-5 h-5 mr-2" />
+              Log out
+            </.link>
+          </div>
+        <% end %>
       </div>
     </div>
     """
