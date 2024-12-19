@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "deploy": "cd .. && mix assets.deploy && rm -f _build/esbuild"
+  },
   "dependencies": {
     "@emoji-mart/data": "^1.2.1",
     "emoji-mart": "^5.6.0"
