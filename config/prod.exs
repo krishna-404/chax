@@ -10,7 +10,7 @@ other_host1 = System.get_env("OTHER_HOST1") || "shipmyapp.in"
 other_host2 = System.get_env("OTHER_HOST2") || "shipmyapp.in"
 
 config :chax, ChaxWeb.Endpoint,
-  url: [host: phx_host, port: port, scheme: "https"],
+  url: [host: phx_host, port: 443, scheme: "https"],
   force_ssl: [rewrite_on: [:x_forwarded_proto]],
   check_origin: [phx_host, other_host1, other_host2],
   cache_static_manifest: "priv/static/cache_manifest.json"
