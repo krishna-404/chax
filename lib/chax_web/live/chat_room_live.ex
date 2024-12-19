@@ -13,7 +13,19 @@ defmodule ChaxWeb.ChatRoomLive do
 
   def render(assigns) do
     ~H"""
-      <div class="flex flex-col flex-shrink-0 w-64 bg-slate-100">
+      <button
+        :if={!@show_sidebar?}
+        class="lg:hidden fixed bottom-16 right-4 z-50 p-2 bg-white rounded-full shadow-lg"
+        phx-click="toggle-sidebar"
+      >
+        <.icon name="hero-bars-3" class="h-6 w-6 text-gray-600" />
+      </button>
+
+      <div class={[
+        "lg:flex flex-col flex-shrink-0 w-64 bg-slate-100 transition-transform duration-200 ease-in-out",
+        "fixed lg:relative h-full z-40",
+        if(@show_sidebar?, do: "translate-x-0", else: "-translate-x-full lg:translate-x-0")
+      ]}>
         <div class="flex justify-between items-center flex-shrink-0 h-16 border-b border-slate-300 px-4">
           <div class="flex flex-col gap-1.5">
             <h1 class="text-lg font-bold text-gray-800">
@@ -232,6 +244,12 @@ defmodule ChaxWeb.ChatRoomLive do
     </.modal>
 
     <div id="emoji-picker-wrapper" class="absolute" phx-update="ignore"></div>
+
+    <div
+      :if={@show_sidebar?}
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 z-30 lg:hidden"
+      phx-click="toggle-sidebar"
+    />
     """
   end
 
@@ -346,6 +364,8 @@ defmodule ChaxWeb.ChatRoomLive do
     Accounts.subscribe_to_user_avatars()
 
     Enum.each(rooms, fn {chat, _} -> Chat.subscribe_to_room(chat) end)
+
+    socket = assign(socket, :show_sidebar?, false)
 
     socket
     |> assign(:rooms, rooms)
@@ -665,5 +685,9 @@ defmodule ChaxWeb.ChatRoomLive do
     else
       socket
     end
+  end
+
+  def handle_event("toggle-sidebar", _, socket) do
+    socket |> update(:show_sidebar?, &(!&1)) |> noreply()
   end
 end

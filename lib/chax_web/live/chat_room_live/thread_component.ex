@@ -9,7 +9,14 @@ defmodule ChaxWeb.ChatRoomLive.ThreadComponent do
   def render(assigns) do
     ~H"""
     <div
-      class="flex flex-col flex-shrink-0 w-1/4 max-w-xs border-l border-slate-300 bg-slate-100"
+      class={[
+        "flex flex-col bg-slate-100",
+        "fixed inset-0 lg:static lg:w-1/4 lg:max-w-xs",
+        "border-l border-slate-300",
+        "z-50",
+        "transform transition-transform duration-300 ease-in-out",
+        "translate-x-0 lg:translate-x-0"
+      ]}
       id="thread-component"
       phx-hook="Thread"
     >
