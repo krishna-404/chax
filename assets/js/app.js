@@ -22,6 +22,7 @@ import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import ChatMessageTextarea from "./hooks/ChatMessageTextarea"
+import Profile from "./hooks/Profile"
 import RoomMessages from "./hooks/RoomMessages"
 import Thread from "./hooks/Thread"
 
@@ -30,6 +31,7 @@ const hooks = {
   ChatMessageTextarea,
   RoomMessages,
   Thread,
+  Profile,
 }
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
