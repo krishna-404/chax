@@ -11,22 +11,31 @@ defmodule ChaxWeb.ChatRoomLive.ThreadComponent do
     <div
       class={[
         "flex flex-col bg-slate-100",
-        "fixed inset-0 lg:static lg:w-1/4 lg:max-w-xs",
+        "fixed sm:static sm:w-96",
         "border-l border-slate-300",
-        "z-50",
-        "transform transition-transform duration-300 ease-in-out",
-        "translate-x-0 lg:translate-x-0"
+        "z-50 sm:z-0",
+        "transform transition-transform duration-300 ease-in-out sm:transform-none",
+        "inset-0 sm:inset-auto",
+        "translate-x-0"
       ]}
       id="thread-component"
       phx-hook="Thread"
     >
-      <div class="flex items-center flex-shrink-0 h-16 border-b border-slate-300 px-4">
-        <div>
-          <h2 class="text-sm font-semibold leading-none">Thread</h2>
-          <a class="text-xs leading-none" href="#">#<%= @room.name %></a>
+      <div class="flex items-center flex-shrink-0 h-16 border-b border-slate-300 px-4 bg-white">
+        <button
+          class="sm:hidden flex items-center justify-center w-8 h-8 -ml-2 rounded-full hover:bg-gray-100"
+          phx-click="close-thread"
+        >
+          <.icon name="hero-arrow-left" class="w-5 h-5" />
+        </button>
+        <div class="flex flex-col ml-2">
+          <h2 class="text-base font-semibold leading-none">Thread</h2>
+          <span class="text-sm text-gray-600 mt-1">
+            #<%= @room.name %>
+          </span>
         </div>
         <button
-          class="flex items-center justify-center w-6 h-6 rounded hover:bg-gray-300 ml-auto"
+          class="hidden sm:flex items-center justify-center w-6 h-6 rounded hover:bg-gray-300 ml-auto"
           phx-click="close-thread"
         >
           <.icon name="hero-x-mark" class="w-5 h-5" />
