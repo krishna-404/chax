@@ -145,16 +145,16 @@ defmodule ChaxWeb.ChatRoomLive do
             <% end %>
           <% end %>
         </div>
-     <div :if={@joined?} class="h-12 bg-white pb-4 w-full">
+     <div :if={@joined?} class="h-12 bg-slate-100 p-1 w-full">
         <.form
           id="new-message-form"
           for={@new_message_form}
           phx-change="validate-message"
           phx-submit="submit-message"
-          class="flex items-center border-2 border-slate-300 rounded-sm p-1 w-full"
+          class="flex items-center w-full"
         >
           <textarea
-            class="w-full text-sm px-3 border-l border-slate-300 mx-1 resize-none"
+            class="w-full text-sm resize-none border-2 border-slate-300 rounded-full px-4 py-1 focus:outline-none focus:border-slate-400 overflow-hidden bg-white"
             cols=""
             id="chat-message-textarea"
             name={@new_message_form[:body].name}
