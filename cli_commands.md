@@ -23,7 +23,7 @@ mix ecto.dump
 
 ## Generate a new migration to add a unique index on the room name
 ```bash
-mix phx.gen.migration create_unique_index_on_room_name
+mix ecto.gen.migration create_unique_index_on_room_name
 mix ecto.migrate
 ```
 ## Generate a phoenix auth for auth based on email and password
@@ -65,7 +65,7 @@ mix ecto.migrate
 
 ## Generate a migration to add last_read_id to room_memberships
 ```bash
-mix phx.gen.migration add_last_read_id_to_memberships
+mix ecto.gen.migration add_last_read_id_to_memberships
 mix ecto.migrate
 ```
 
